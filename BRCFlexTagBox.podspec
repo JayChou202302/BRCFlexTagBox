@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'BRCFlexTagBox'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'A powerful flexible label arrangement container box'
   s.homepage         = 'https://github.com/jaychou202302/BRCFlexTagBox'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }

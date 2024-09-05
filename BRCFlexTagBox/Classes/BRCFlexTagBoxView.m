@@ -20,13 +20,14 @@ void setLabelText(id text,UILabel *label) {
     }
 }
 
-CGSize sigleLineHeightForText(id text,CGFloat maxWidth,UIEdgeInsets contentInsets) {
+CGSize sigleLineHeightForText(id text,UIFont *font,CGFloat maxWidth,UIEdgeInsets contentInsets) {
     static UILabel *textLabel;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         textLabel = [UILabel new];
         textLabel.numberOfLines = 1;
     });
+    textLabel.font = font;
     setLabelText(text, textLabel);
     CGSize fitSize = [textLabel sizeThatFits:CGSizeMake(maxWidth, HUGE)];
     return CGSizeMake(ceil(fitSize.width) + contentInsets.left + contentInsets.right + 1, ceil(fitSize.height) + contentInsets.top + contentInsets.bottom + 1);
@@ -300,14 +301,18 @@ UICollectionViewDataSource
   sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.item < self.dataSource.count) {
         id object = self.dataSource[indexPath.item];
+        NSString *text = object;
+        UIFont *textFont = self.defaultTagStyle.tagTextFont;
         CGFloat maxWidth = self.defaultTagStyle.tagMaxWidth;
         UIEdgeInsets contentInsets = self.defaultTagStyle.tagContentInsets;
         if ([object isKindOfClass:[BRCFlexTagModel class]] &&
             [[(BRCFlexTagModel *)object style] isKindOfClass:[BRCFlexTagStyle class]]) {
             maxWidth = [(BRCFlexTagModel *)object style].tagMaxWidth;
             contentInsets = [(BRCFlexTagModel *)object style].tagContentInsets;
+            text = [(BRCFlexTagModel *)object text];
+            textFont = [(BRCFlexTagModel *)object style].tagTextFont;
         }
-        return sigleLineHeightForText(object , maxWidth, contentInsets);
+        return sigleLineHeightForText(text,textFont, maxWidth, contentInsets);
     }
     return CGSizeMake(0, 0);
 }
@@ -351,6 +356,11 @@ UICollectionViewDataSource
 - (void)setContentInsets:(UIEdgeInsets)contentInsets {
     _contentInsets = contentInsets;
     [self updateCollectionViewConstraints];
+}
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor {
+    [super setBackgroundColor:backgroundColor];
+    self.collectionView.backgroundColor = backgroundColor;
 }
 
 #pragma mark - getter
