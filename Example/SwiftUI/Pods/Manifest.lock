@@ -1,0 +1,27 @@
+PODS:
+  - BRCFastTest (0.2.1):
+    - FLEX
+  - BRCFlexTagBox (0.1.0)
+  - FLEX (5.22.10)
+
+DEPENDENCIES:
+  - BRCFastTest
+  - BRCFlexTagBox (from `../../../BRCFlexTagBox`)
+
+SPEC REPOS:
+  trunk:
+    - BRCFastTest
+    - FLEX
+
+EXTERNAL SOURCES:
+  BRCFlexTagBox:
+    :path: "../../../BRCFlexTagBox"
+
+SPEC CHECKSUMS:
+  BRCFastTest: de3467376e4d1fb13796b7c70c1d2bb14f722bdc
+  BRCFlexTagBox: d713c2c417a3573d7d7e236750e90ad936616262
+  FLEX: f21ee4f498eed3f8a1eded66b21939fd3b7a22ce
+
+PODFILE CHECKSUM: 78739b37e10edd5de15c334e65c9eab5e9b7d835
+
+COCOAPODS: 1.15.2

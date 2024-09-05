@@ -1,0 +1,4 @@
+${PODS_ROOT}/Target Support Files/Pods-BRCFlexTagBox_SwiftUI/Pods-BRCFlexTagBox_SwiftUI-frameworks.sh
+${BUILT_PRODUCTS_DIR}/BRCFastTest/BRCFastTest.framework
+${BUILT_PRODUCTS_DIR}/BRCFlexTagBox/BRCFlexTagBox.framework
+${BUILT_PRODUCTS_DIR}/FLEX/FLEX.framework

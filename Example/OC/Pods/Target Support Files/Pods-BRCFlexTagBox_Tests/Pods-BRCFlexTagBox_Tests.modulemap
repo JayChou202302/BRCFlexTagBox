@@ -1,0 +1,6 @@
+framework module Pods_BRCFlexTagBox_Tests {
+  umbrella header "Pods-BRCFlexTagBox_Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}
