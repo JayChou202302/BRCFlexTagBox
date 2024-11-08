@@ -37,31 +37,76 @@ CGSize sigleLineHeightForText(id text,UIFont *font,CGFloat maxWidth,UIEdgeInsets
 
 @interface BRCFlexLayout : UICollectionViewFlowLayout
 
+@property (nonatomic, strong) NSMutableArray *itemAttributes;
+@property (nonatomic, assign) CGFloat contentHeight;
+@property (nonatomic, weak) id<UICollectionViewDelegateFlowLayout> delegate;
+
 @end
 
 @implementation BRCFlexLayout
 
-- (NSArray<__kindof UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect {
-    NSMutableArray *attributes = [[super layoutAttributesForElementsInRect:rect] mutableCopy];
+- (void)prepareLayout {
+    [super prepareLayout];
     
-    if (attributes.count == 1) {
-        UICollectionViewLayoutAttributes *firstAttribute = attributes.firstObject;
-        CGRect frame = firstAttribute.frame;
-        frame.origin.x = self.sectionInset.left;
-    } else {
-        for (int i = 1; i < [attributes count]; ++i) {
-            UICollectionViewLayoutAttributes *currentLayoutAttributes = attributes[i];
-            UICollectionViewLayoutAttributes *prevLayoutAttributes = attributes[i - 1];
-            NSInteger maximumSpacing = self.minimumInteritemSpacing;
-            NSInteger origin = CGRectGetMaxX(prevLayoutAttributes.frame);
-            if (origin + maximumSpacing + currentLayoutAttributes.frame.size.width < self.collectionViewContentSize.width - self.sectionInset.right - self.sectionInset.left) {
-                CGRect frame = currentLayoutAttributes.frame;
-                frame.origin.x = origin + maximumSpacing;
-                currentLayoutAttributes.frame = frame;
-            }
+    self.itemAttributes = [NSMutableArray array];
+    self.contentHeight = 0;
+    
+    // 获取 collection view 的宽度
+    CGFloat collectionViewWidth = self.collectionView.bounds.size.width;
+    
+    // 设置 item 的水平和垂直间距
+    CGFloat interItemSpacing = self.minimumInteritemSpacing;
+    CGFloat lineSpacing = self.minimumLineSpacing;
+    
+    CGFloat currentX = 0;    // 当前行的 x 坐标
+    CGFloat currentY = 0;    // 当前行的 y 坐标
+    CGFloat maxHeightInRow = 0; // 当前行中 item 的最大高度
+    
+    // 获取 item 数量
+    NSInteger itemCount = [self.collectionView numberOfItemsInSection:0];
+    
+    for (NSInteger i = 0; i < itemCount; i++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:0];
+        
+        // 获取每个 item 的大小
+        CGSize itemSize = [self.delegate collectionView:self.collectionView layout:self sizeForItemAtIndexPath:indexPath];
+        
+        // 判断是否需要换行
+        if (currentX + itemSize.width >= collectionViewWidth) {
+            currentX = 0;
+            currentY += maxHeightInRow + lineSpacing;
+            maxHeightInRow = 0;
+        }
+        
+        // 创建 item 布局属性
+        UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
+        attributes.frame = CGRectMake(currentX, currentY, itemSize.width, itemSize.height);
+        [self.itemAttributes addObject:attributes];
+        
+        // 更新坐标和行的最大高度
+        currentX += itemSize.width + interItemSpacing;
+        maxHeightInRow = MAX(maxHeightInRow, itemSize.height);
+    }
+    
+    // 更新内容高度
+    self.contentHeight = currentY + maxHeightInRow;
+}
+
+- (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect {
+    // 返回所有可见区域内的布局属性
+    NSMutableArray<UICollectionViewLayoutAttributes *> *attributes = [NSMutableArray array];
+    for (UICollectionViewLayoutAttributes *attr in self.itemAttributes) {
+        if (CGRectIntersectsRect(attr.frame, rect)) {
+            [attributes addObject:attr];
         }
     }
-   return [attributes copy];
+    return attributes;
+}
+
+- (CGSize)collectionViewContentSize {
+    // 返回内容大小
+    CGFloat contentWidth = self.collectionView.bounds.size.width;
+    return CGSizeMake(contentWidth, self.contentHeight);
 }
 
 @end
@@ -198,6 +243,24 @@ CGSize sigleLineHeightForText(id text,UIFont *font,CGFloat maxWidth,UIEdgeInsets
     return NO;
 }
 
+- (id)copyWithZone:(nullable NSZone *)zone {
+    BRCFlexTagStyle *style = [BRCFlexTagStyle new];
+    style.tagTextFont = self.tagTextFont;
+    style.tagTextColor = self.tagTextColor;
+    style.tagBorderColor = self.tagBorderColor;
+    style.tagBackgroundColor = self.tagBackgroundColor;
+    style.tagShadowColor = self.tagShadowColor;
+    style.tagShadowOffset = self.tagShadowOffset;
+    style.tagShadowOpacity = self.tagShadowOpacity;
+    style.tagShadowRadius = self.tagShadowRadius;
+    style.tagMaxWidth = self.tagMaxWidth;
+    style.tagBorderWidth = self.tagBorderWidth;
+    style.tagCornerRadius = self.tagCornerRadius;
+    style.tagContentInsets = self.tagContentInsets;
+    style.tagTextAlignment = self.tagTextAlignment;
+    return style;
+}
+
 @end
 
 #pragma mark - model
@@ -229,7 +292,8 @@ CGSize sigleLineHeightForText(id text,UIFont *font,CGFloat maxWidth,UIEdgeInsets
 @interface BRCFlexTagBoxView ()
 <
 UICollectionViewDelegate,
-UICollectionViewDataSource
+UICollectionViewDataSource,
+UICollectionViewDelegateFlowLayout
 >
 
 @property (nonatomic, strong) UICollectionView *collectionView;
@@ -271,12 +335,12 @@ UICollectionViewDataSource
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    if (!CGSizeEqualToSize(self.contentSize, CGSizeZero)) {
-        [NSLayoutConstraint activateConstraints:@[
-            [self.collectionView.widthAnchor constraintEqualToConstant:self.contentSize.width],
-            [self.collectionView.heightAnchor constraintEqualToConstant:self.contentSize.height],
-        ]];
-    }
+//    if (!CGSizeEqualToSize(self.contentSize, CGSizeZero)) {
+//        [NSLayoutConstraint activateConstraints:@[
+//            [self.collectionView.widthAnchor constraintEqualToConstant:self.contentSize.width],
+//            [self.collectionView.heightAnchor constraintEqualToConstant:self.contentSize.height],
+//        ]];
+//    }
 }
 
 #pragma mark - public
@@ -388,6 +452,7 @@ UICollectionViewDataSource
         BRCFlexLayout *layout = [BRCFlexLayout new];
         layout.minimumLineSpacing = self.lineSpacing;
         layout.minimumInteritemSpacing = self.itemSpacing;
+        layout.delegate = self;
         _collectionLayout = layout;
     }
     return _collectionLayout;

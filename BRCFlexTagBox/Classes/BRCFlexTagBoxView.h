@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /// The Style For Tag
-@interface BRCFlexTagStyle : NSObject
+@interface BRCFlexTagStyle : NSObject<NSCopying>
 
 @property (nonatomic, strong) UIColor *tagTextColor;
 @property (nonatomic, strong) UIFont  *tagTextFont;
